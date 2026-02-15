@@ -1,11 +1,11 @@
 import { streamText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { gateway } from "@ai-sdk/gateway";
 
 export const maxDuration = 30;
 
 export async function POST() {
   const result = await streamText({
-    model: openai("gpt-4o-mini"),
+    model: gateway("openai/gpt-4o-mini"),
     prompt: `Write a short, poetic, heartfelt reason why someone loves their girlfriend. 
     
 Rules:
