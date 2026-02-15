@@ -4,12 +4,22 @@ import { gateway } from "@ai-sdk/gateway";
 export const maxDuration = 30;
 
 export async function POST() {
-  // Random style selector for variety
-  const styles = ["sweet", "goofy", "poetic", "playful", "cheesy", "heartfelt"];
-  const randomStyle = styles[Math.floor(Math.random() * styles.length)];
-  
-  const result = await streamText({
-    model: gateway("openai/gpt-4o-mini"),
+  try {
+    // Random style selector for variety
+    const styles = ["sweet", "goofy", "poetic", "playful", "cheesy", "heartfelt"];
+    const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+    
+    // Check if API key is available
+    if (!process.env.AI_GATEWAY_API_KEY) {
+      console.error("AI_GATEWAY_API_KEY is not set");
+      return new Response(
+        JSON.stringify({ error: "AI Gateway API key not configured" }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    
+    const result = await streamText({
+      model: gateway("openai/gpt-4o-mini"),
     prompt: `Write a ${randomStyle} reason why a boyfriend loves his girlfriend for Valentine's Day.
 
 IMPORTANT RULES:
@@ -34,9 +44,18 @@ Example vibes (vary A LOT from these):
 - "You make even grocery shopping feel like an adventure. How do you do that?"
 
 Now write something fresh and different:`,
-    temperature: 1.0,
-    maxOutputTokens: 100,
-  });
+      temperature: 1.0,
+      maxOutputTokens: 100,
+    });
 
-  return result.toTextStreamResponse();
+    return result.toTextStreamResponse();
+  } catch (error) {
+    console.error("Error in love-stream API:", error);
+    return new Response(
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : "Failed to generate message" 
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
 }

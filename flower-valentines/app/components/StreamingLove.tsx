@@ -8,22 +8,30 @@ export default function StreamingLove() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [hasStarted, setHasStarted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const { completion, isLoading, complete } = useCompletion({
+  const { completion, isLoading, complete, error: apiError } = useCompletion({
     api: "/api/love-stream",
+    onError: (err) => {
+      console.error("AI API Error:", err);
+      setError("Failed to generate message. Please try again!");
+    },
   });
 
-  // Start when scrolled into view
+  // Start when scrolled into view OR immediately on mount (for testing)
   useEffect(() => {
-    if (isInView && !hasStarted) {
+    if (!hasStarted) {
+      // Start immediately, don't wait for scroll
       setHasStarted(true);
+      setError(null);
       complete("");
     }
-  }, [isInView, hasStarted, complete]);
+  }, [hasStarted, complete]);
 
   // Click handler to get a new message
   const handleClick = useCallback(() => {
     if (!isLoading) {
+      setError(null);
       complete("");
     }
   }, [isLoading, complete]);
@@ -107,7 +115,17 @@ export default function StreamingLove() {
 
           {/* Streaming content */}
           <div className="relative z-10 min-h-[120px] flex items-center justify-center">
-            {!hasStarted ? (
+            {error ? (
+              <div className="text-center">
+                <p className="text-[#D46A92] text-lg mb-2">{error}</p>
+                <button
+                  onClick={handleClick}
+                  className="text-sm text-[#D46A92] underline hover:no-underline"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : !hasStarted ? (
               <p className="text-[#2d2d2d]/50 text-lg">
                 Scroll to reveal...
               </p>
@@ -116,7 +134,7 @@ export default function StreamingLove() {
                 className="text-lg md:text-xl lg:text-2xl text-[#2d2d2d] leading-relaxed glow"
                 style={{ fontFamily: "var(--font-playfair)" }}
               >
-                {completion || "..."}
+                {completion || (isLoading ? "..." : "Click to generate a sweet message! 💕")}
                 {isLoading && (
                   <span className="inline-block w-[3px] h-[1.2em] bg-[#D46A92] ml-1 align-middle cursor-blink" />
                 )}
