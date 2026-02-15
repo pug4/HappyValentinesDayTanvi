@@ -49,7 +49,7 @@ Now write something fresh and different:`,
       maxOutputTokens: 100,
     });
 
-    return result.toTextStreamResponse();
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error("Error in love-stream API:", error);
     return new Response(
