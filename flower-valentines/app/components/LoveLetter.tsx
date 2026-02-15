@@ -12,16 +12,16 @@ export default function LoveLetter() {
   const [isLoading, setIsLoading] = useState(true);
   const [imageKey, setImageKey] = useState(0);
 
-  // Fetch photos list on mount
+  // Fetch photos list on mount (from static JSON file)
   useEffect(() => {
-    fetch("/api/photos")
+    fetch("/photos.json")
       .then((res) => res.json())
-      .then((data) => {
-        if (data.photos && data.photos.length > 0) {
-          setPhotos(data.photos);
+      .then((photoList: string[]) => {
+        if (photoList && photoList.length > 0) {
+          setPhotos(photoList);
           // Pick a random photo initially
-          const randomIndex = Math.floor(Math.random() * data.photos.length);
-          setCurrentPhoto(data.photos[randomIndex]);
+          const randomIndex = Math.floor(Math.random() * photoList.length);
+          setCurrentPhoto(photoList[randomIndex]);
         }
         setIsLoading(false);
       })
