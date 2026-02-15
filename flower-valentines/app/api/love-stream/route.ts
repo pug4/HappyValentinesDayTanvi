@@ -23,7 +23,7 @@ Example styles (vary widely from these):
 - "In your arms, the chaos of the world goes quiet. You are my calm, my peace, my home."
 - "When you laugh, truly laugh, the whole room becomes brighter. I live for those moments."`,
     temperature: 0.9,
-    maxTokens: 150,
+    maxOutputTokens: 150,
   });
 
   return result.toTextStreamResponse();
