@@ -2,7 +2,7 @@
 
 import { useCompletion } from "@ai-sdk/react";
 import { motion, useInView } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 
 export default function StreamingLove() {
   const ref = useRef<HTMLDivElement>(null);
@@ -13,6 +13,7 @@ export default function StreamingLove() {
     api: "/api/love-stream",
   });
 
+  // Start when scrolled into view
   useEffect(() => {
     if (isInView && !hasStarted) {
       setHasStarted(true);
@@ -20,15 +21,12 @@ export default function StreamingLove() {
     }
   }, [isInView, hasStarted, complete]);
 
-  // Auto-restart after completion
-  useEffect(() => {
-    if (hasStarted && !isLoading && completion && completion.length > 0) {
-      const timeout = setTimeout(() => {
-        complete("");
-      }, 5000); // Wait 5 seconds before restarting
-      return () => clearTimeout(timeout);
+  // Click handler to get a new message
+  const handleClick = useCallback(() => {
+    if (!isLoading) {
+      complete("");
     }
-  }, [isLoading, completion, hasStarted, complete]);
+  }, [isLoading, complete]);
 
   return (
     <section
@@ -76,12 +74,15 @@ export default function StreamingLove() {
           (And They Never End)
         </motion.p>
 
-        {/* Streaming text container */}
+        {/* Streaming text container - CLICKABLE */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="relative min-h-[200px] p-8 md:p-12 rounded-2xl bg-white/50 backdrop-blur-sm shadow-lg border border-[#F8C8DC]/30"
+          onClick={handleClick}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="relative min-h-[200px] p-8 md:p-12 rounded-2xl bg-white/50 backdrop-blur-sm shadow-lg border border-[#F8C8DC]/30 cursor-pointer group"
         >
           {/* Decorative quotes */}
           <span className="absolute top-4 left-6 text-6xl text-[#D46A92] opacity-20 leading-none">
@@ -90,6 +91,19 @@ export default function StreamingLove() {
           <span className="absolute bottom-4 right-6 text-6xl text-[#D46A92] opacity-20 leading-none">
             &rdquo;
           </span>
+
+          {/* Refresh hint on hover */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isLoading ? 0 : 1 }}
+            className="absolute top-4 right-4 opacity-0 group-hover:opacity-60 transition-opacity"
+          >
+            <div className="bg-[#D46A92]/10 rounded-full p-2">
+              <svg className="w-5 h-5 text-[#D46A92]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
+          </motion.div>
 
           {/* Streaming content */}
           <div className="relative z-10 min-h-[120px] flex items-center justify-center">
@@ -133,12 +147,23 @@ export default function StreamingLove() {
           )}
         </motion.div>
 
+        {/* Click hint */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 0.7 } : { opacity: 0 }}
+          transition={{ duration: 1, delay: 1 }}
+          className="text-sm text-[#D46A92] mt-6 tracking-wide"
+          style={{ fontFamily: "var(--font-dancing)" }}
+        >
+          💕 Tap for another reason 💕
+        </motion.p>
+
         {/* Subtitle */}
         <motion.p
           initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 0.6 } : { opacity: 0 }}
-          transition={{ duration: 1, delay: 1 }}
-          className="text-sm text-[#2d2d2d] mt-8 tracking-wide"
+          animate={isInView ? { opacity: 0.5 } : { opacity: 0 }}
+          transition={{ duration: 1, delay: 1.2 }}
+          className="text-xs text-[#2d2d2d] mt-3 tracking-wide"
           style={{ fontFamily: "var(--font-inter)" }}
         >
           ✨ Powered by love (and a little AI magic) ✨
